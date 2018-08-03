@@ -5,7 +5,7 @@ from uuid import uuid4
 from flask import Flask, abort, jsonify, request, send_from_directory 
 from werkzeug.utils import secure_filename
 
-from flask_script import Manager, Server 
+
 import pickle
 
 import hashlib
