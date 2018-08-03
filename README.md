@@ -16,13 +16,13 @@ git clone https://github.com/moata/kokoUpload.git
 
 Build Docker image 
 ```
-docker build -t kokoUpload:latest .
+docker build -t kokoupload:latest .
 ```
 
 Run Docker Container 
 
 ```
-docker run  -e APPLICATION_SETTINGS="./config.cfg" -v uploadedFiles:/app/uploadedFiles/  -p 5000:5000 kokoUpload
+docker run  -e APPLICATION_SETTINGS="./config.cfg" -v uploadedFiles:/app/uploadedFiles/  -p 5000:5000 kokoupload
 ```
 
 Upload File 
