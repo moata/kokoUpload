@@ -150,4 +150,4 @@ def post_file(filename):
 
 
 if __name__ == '__main__':
-    api.run(host='0.0.0.0',port='5000')
+    api.run(host=api.config['HOST'],port=api.config['PORT'])
