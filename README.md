@@ -37,7 +37,7 @@ curl http://127.0.0.1:5000/files/XXXXXXX.gif
 
 List Files
 ```
-curl http://127.0.0.1:5000/files/
+curl http://127.0.0.1:5000/files
 ```
 
 Delete File

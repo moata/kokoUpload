@@ -84,7 +84,7 @@ def allowed_file(filename):
 
 
 # Delete file
-@api.route('/files/del/<filename>')
+@api.route('/files/del/<filename>',strict_slashes=False)
 def delete_file(filename):
     if os.path.exists(os.path.join(UPLOAD_DIR,filename)):
         try:
@@ -103,7 +103,7 @@ def delete_file(filename):
         return 'File not exists ',404
 
 # List files on the server 
-@api.route('/files')
+@api.route('/files',strict_slashes=False)
 def list_files():
     files = []
     for filename in os.listdir(UPLOAD_DIR):
@@ -113,7 +113,7 @@ def list_files():
     return jsonify(files)
 
 # Download a file
-@api.route('/files/<path:path>')
+@api.route('/files/<path:path>',strict_slashes=False)
 def get_file(path):
     return send_from_directory(UPLOAD_DIR,path,as_attachment=True)
 
