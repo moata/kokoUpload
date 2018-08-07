@@ -13,6 +13,7 @@ hasher = hashlib.sha1()
 
 BLOCKSIZE=65536
 UPLOAD_DIR = '/app/uploadedFiles/'
+DB_FILE = '/app/db.pkl'
 
 # calculate checksum for a file 
 def genCheckSumForFiles(names,root):
@@ -36,7 +37,7 @@ def checkSumCalc(dbFile):
                     md5 = genCheckSumForFiles(names,root)
                     
                     dbFile.update({md5:names})
-                    output = open("db.pkl","wb")
+                    output = open(DB_FILE,"wb")
                     pickle.dump(dbFile,output)
                     output.close()
 
@@ -49,13 +50,13 @@ def checkSumCalc(dbFile):
 
 def checkSumDbFile():
     try:
-        dbFile = pickle.load(open("db.pkl","rb"))
+        dbFile = pickle.load(open(DB_FILE,"rb"))
         checkSumCalc(dbFile)
         return Flask(__name__) 
     except (OSError, IOError) as e:
         foo = {'a':0}
-        pickle.dump(foo,open("db.pkl","wb"))
-        dbFile = pickle.load(open("db.pkl","rb"))
+        pickle.dump(foo,open(DB_FILE,"wb"))
+        dbFile = pickle.load(open(DB_FILE,"rb"))
         checkSumCalc(dbFile)
         return Flask(__name__)
 
@@ -66,9 +67,6 @@ api.config.from_envvar('APPLICATION_SETTINGS')
 
 if not os.path.exists(UPLOAD_DIR):
     os.makedirs(UPLOAD_DIR)
-
-
-
 
 # calculate a checksum for data string
 def genCheckSum(uploadedFile):
@@ -87,18 +85,20 @@ def allowed_file(filename):
 @api.route('/files/del/<filename>',strict_slashes=False)
 def delete_file(filename):
     if os.path.exists(os.path.join(UPLOAD_DIR,filename)):
-        try:
-            os.remove(os.path.join(UPLOAD_DIR,filename))
-            dbFile = pickle.load(open("db.pkl","wb"))
+        if os.path.isfile(DB_FILE):
+            with open(DB_FILE,'rb') as f:
+                dbFile = pickle.load(f)
             for key, value in dbFile.iteritems():
                 if filename == value:
-                    del dbFile[value]
-                    output2 = open("db.pkl","wb")
-                    pickle.dump(dbFile,output2)
-                    output2.close()
-            return 'Deleted\n',201
-        except:
-            return 'Not able to delete',403
+                    try:
+                        del dbFile[key]
+                        os.remove(os.path.join(UPLOAD_DIR,filename))
+                        with open(DB_FILE,'wb') as f:
+                            pickle.dump(dbFile,f)
+                            f.close()
+                        return 'Deleted\n',201
+                    except KeyError:
+                        return 'Not able to delete',403
     else:
         return 'File not exists ',404
 
@@ -131,19 +131,20 @@ def post_file(filename):
     extension,allowed = allowed_file(filename)
     if allowed:
         # open the database file to check if this hash already exists
-        output = pickle.load(open("db.pkl","rb"))
-        if requestMD5 in output:
-            return "http://"+request.host+"/files/"+output[requestMD5]+'\n',201
+        with open(DB_FILE,'rb') as f:
+            dbFile = pickle.load(f)
+        if requestMD5 in dbFile:
+            return "http://"+request.host+"/files/"+dbFile[requestMD5]+'\n',201
         else:
             # generate uuid for the new file 
             Nfilename = urlsafe_b64encode(uuid4().bytes).decode("ascii").rstrip("=")
             with open(os.path.join(UPLOAD_DIR,Nfilename+"."+extension),'wb') as fp:
                 fp.write(request.data)
             # upload the checksum in database file 
-            output.update({requestMD5:Nfilename+"."+extension})
-            output2 = open("db.pkl","wb")
-            pickle.dump(output,output2)
-            output2.close()
+            dbFile.update({requestMD5:Nfilename+"."+extension})
+            with open(DB_FILE,'wb') as f:
+                pickle.dump(dbFile,f)
+                f.close()
         return "http://"+request.host+"/files/"+Nfilename+"."+extension+'\n',201
     else:
         return abort(400,'not allowed extension')
