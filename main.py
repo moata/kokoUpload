@@ -96,7 +96,7 @@ def delete_file(filename):
                         with open(DB_FILE,'wb') as f:
                             pickle.dump(dbFile,f)
                             f.close()
-                        return 'Deleted\n',201
+                        return 'Deleted\n',200
                     except KeyError:
                         return 'Not able to delete',403
     else:

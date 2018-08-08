@@ -44,5 +44,7 @@ Delete File
 ```
 curl http://127.0.0.1:5000/files/del/XXXXXXXX.gif
 ```
+
+
 #### TO DO
 - [] Authentication and Authorization 
