@@ -82,7 +82,7 @@ def allowed_file(filename):
 
 
 # Delete file
-@api.route('/files/del/<filename>',strict_slashes=False)
+@api.route('/files/<filename>',methods=['DELETE'],strict_slashes=False)
 def delete_file(filename):
     if os.path.exists(os.path.join(UPLOAD_DIR,filename)):
         if os.path.isfile(DB_FILE):
